@@ -1,0 +1,6 @@
+.env
+logs/*.log
+screenshots/*.png
+whatsapp_profile/
+__pycache__/
+*.pyc
