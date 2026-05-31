@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from html import escape
 from pathlib import Path
 from typing import Any
 
@@ -100,3 +101,106 @@ def generate_markdown_report(
     path = REPORTS_DIR / f"{snapshot.date}.md"
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return path
+
+
+def generate_telegram_report(
+    snapshot: AttendanceSnapshot, comparison: dict[str, Any]
+) -> str:
+    theory, labs = _split_subject_groups(snapshot)
+    generated_at = now_local().strftime("%I:%M %p - %b %d, %Y")
+
+    lines = [
+        "<b>📊 Attendance Bot</b>",
+        "<b>Attendance Report</b>",
+        escape(now_local().strftime("%B %d, %Y")),
+        "",
+        f"<b>Overall:</b> <code>{snapshot.overall_percentage:.2f}%</code>",
+        f"<b>Conducted:</b> <code>{snapshot.total_classes_conducted}</code>",
+        f"<b>Attended:</b> <code>{snapshot.classes_attended}</code>",
+        "",
+    ]
+
+    if theory:
+        lines.extend(["<b>THEORY</b>", *_format_subject_lines(theory), ""])
+    if labs:
+        lines.extend(["<b>LABS &amp; OTHERS</b>", *_format_subject_lines(labs), ""])
+
+    if snapshot.shortage_subjects:
+        shortage = ", ".join(
+            f"{subject.subject} ({subject.percentage:.1f}%)"
+            for subject in snapshot.subjects
+            if subject.subject in snapshot.shortage_subjects
+        )
+        lines.append(f"⚠️ <b>Below 75%:</b> {escape(shortage)}")
+
+    overall_delta = comparison.get("overall_delta")
+    if overall_delta is not None:
+        if overall_delta < 0:
+            lines.append(f"🔻 <b>Attendance dropped:</b> {abs(overall_delta):.2f}%")
+        elif overall_delta > 0:
+            lines.append(f"✅ <b>Attendance increased:</b> {overall_delta:.2f}%")
+
+    lines.extend(["", f"<i>Generated at {escape(generated_at)} IST</i>"])
+    return "\n".join(lines)
+
+
+def generate_telegram_alert(snapshot: AttendanceSnapshot) -> str:
+    lines = [
+        "🚨 <b>Attendance alert</b>",
+        "",
+        f"<b>Date:</b> {escape(now_local().strftime('%B %d, %Y'))}",
+        f"<b>Overall:</b> <code>{snapshot.overall_percentage:.2f}%</code>",
+    ]
+    if snapshot.shortage_subjects:
+        lines.append("")
+        for subject in snapshot.subjects:
+            if subject.subject in snapshot.shortage_subjects:
+                lines.append(
+                    f"⚠️ {escape(subject.subject)} is below 75% "
+                    f"(<code>{subject.percentage:.1f}%</code>)"
+                )
+    return "\n".join(lines)
+
+
+def _split_subject_groups(
+    snapshot: AttendanceSnapshot,
+) -> tuple[list[Any], list[Any]]:
+    lab_keywords = ("lab", "association", "self learning", "tutorial")
+    theory = []
+    labs = []
+    for subject in snapshot.subjects:
+        target = labs if any(word in subject.subject.lower() for word in lab_keywords) else theory
+        target.append(subject)
+    return theory, labs
+
+
+def _format_subject_lines(subjects: list[Any]) -> list[str]:
+    return [
+        (
+            f"{_status_icon(subject.percentage)} "
+            f"{escape(_shorten(subject.subject, 26))}\n"
+            f"<code>{_bar(subject.percentage)}</code> "
+            f"<b>{subject.percentage:.1f}%</b> "
+            f"<code>{subject.classes_present}/{subject.classes_held}</code>"
+        )
+        for subject in subjects
+    ]
+
+
+def _status_icon(percentage: float) -> str:
+    if percentage < 75:
+        return "🔴"
+    if percentage >= 90:
+        return "🟢"
+    return "🔵"
+
+
+def _bar(percentage: float, width: int = 12) -> str:
+    filled = round(width * max(0, min(percentage, 100)) / 100)
+    return "█" * filled + "░" * (width - filled)
+
+
+def _shorten(value: str, limit: int) -> str:
+    if len(value) <= limit:
+        return value
+    return value[: limit - 1].rstrip() + "…"

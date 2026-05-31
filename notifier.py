@@ -45,7 +45,7 @@ class Notifier:
             json={
                 "chat_id": self.settings.telegram_chat_id,
                 "text": message,
-                "parse_mode": "Markdown",
+                "parse_mode": "HTML",
             },
             timeout=30,
         )

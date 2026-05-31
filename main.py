@@ -14,6 +14,8 @@ from notifier import Notifier
 from storage import (
     compare_with_previous,
     generate_markdown_report,
+    generate_telegram_alert,
+    generate_telegram_report,
     previous_record,
     save_daily_snapshot,
 )
@@ -43,7 +45,12 @@ def run_check() -> None:
     report_text = report_path.read_text(encoding="utf-8")
 
     notifier = Notifier(settings)
-    notifier.send_report(f"Attendance Report - {snapshot.date}", report_text)
+    notification_text = (
+        generate_telegram_report(snapshot, comparison)
+        if settings.notifier_method == "telegram"
+        else report_text
+    )
+    notifier.send_report(f"Attendance Report - {snapshot.date}", notification_text)
 
     if snapshot.overall_percentage < settings.attendance_threshold or snapshot.shortage_subjects:
         alert_lines = [
@@ -53,7 +60,12 @@ def run_check() -> None:
         ]
         if snapshot.shortage_subjects:
             alert_lines.append("Below 75%: " + ", ".join(snapshot.shortage_subjects))
-        notifier.send_report("Attendance Alert", "\n".join(alert_lines))
+        alert_text = (
+            generate_telegram_alert(snapshot)
+            if settings.notifier_method == "telegram"
+            else "\n".join(alert_lines)
+        )
+        notifier.send_report("Attendance Alert", alert_text)
 
     logging.getLogger(__name__).info("Attendance check completed. Report: %s", report_path)
 
