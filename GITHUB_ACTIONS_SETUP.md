@@ -4,6 +4,8 @@ This workflow runs the attendance bot every day at 6:00 PM IST and sends the rep
 
 ## 1. Push This Project To GitHub
 
+Use the `attendance_bot` folder as the repository root. Your GitHub repo should show `main.py`, `requirements.txt`, and `.github/workflows/attendance-monitor.yml` directly in the top level.
+
 Keep `.env` private. It is already ignored by `.gitignore`.
 
 ## 2. Add Repository Secrets

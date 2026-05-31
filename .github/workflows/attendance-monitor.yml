@@ -14,10 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
-    defaults:
-      run:
-        working-directory: attendance_bot
-
     env:
       ERP_URL: https://erp.lbrce.ac.in/
       ERP_USERNAME: ${{ secrets.ERP_USERNAME }}
@@ -48,11 +44,10 @@ jobs:
 
       - name: Persist attendance history and reports
         if: always()
-        working-directory: .
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add attendance_bot/attendance_history.json attendance_bot/reports
+          git add attendance_history.json reports
           if git diff --cached --quiet; then
             echo "No attendance artifacts changed."
           else
@@ -66,6 +61,6 @@ jobs:
         with:
           name: attendance-debug-artifacts
           path: |
-            attendance_bot/logs
-            attendance_bot/screenshots
+            logs
+            screenshots
           if-no-files-found: ignore
