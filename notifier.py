@@ -33,8 +33,10 @@ class Notifier:
 
     def _send_telegram(self, message: str) -> None:
         if not self.settings.telegram_bot_token or not self.settings.telegram_chat_id:
-            LOGGER.warning("Telegram notifier is selected but token/chat id are missing")
-            return
+            raise RuntimeError(
+                "Telegram notifier is selected but TELEGRAM_BOT_TOKEN or "
+                "TELEGRAM_CHAT_ID is missing"
+            )
 
         url = (
             "https://api.telegram.org/bot"
@@ -58,8 +60,7 @@ class Notifier:
             or not self.settings.gmail_app_password
             or not self.settings.gmail_to
         ):
-            LOGGER.warning("Gmail notifier is selected but email settings are missing")
-            return
+            raise RuntimeError("Gmail notifier is selected but email settings are missing")
 
         email = EmailMessage()
         email["From"] = self.settings.gmail_user
@@ -91,13 +92,11 @@ class Notifier:
 
     def _send_whatsapp(self, message: str) -> None:
         if not self.settings.whatsapp_phone:
-            LOGGER.warning("WhatsApp notifier is selected but WHATSAPP_PHONE is missing")
-            return
+            raise RuntimeError("WhatsApp notifier is selected but WHATSAPP_PHONE is missing")
 
         phone = "".join(ch for ch in self.settings.whatsapp_phone if ch.isdigit())
         if not phone:
-            LOGGER.warning("WHATSAPP_PHONE does not contain a valid phone number")
-            return
+            raise RuntimeError("WHATSAPP_PHONE does not contain a valid phone number")
 
         url = f"https://web.whatsapp.com/send?phone={phone}&text={quote(message)}"
         with sync_playwright() as playwright:
