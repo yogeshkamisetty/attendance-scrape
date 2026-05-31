@@ -3,13 +3,12 @@ from __future__ import annotations
 import logging
 import re
 from dataclasses import asdict, dataclass
-from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError, sync_playwright
 
-from config import SCREENSHOTS_DIR, Settings
+from config import SCREENSHOTS_DIR, Settings, now_local
 
 
 LOGGER = logging.getLogger(__name__)
@@ -178,7 +177,7 @@ class AttendanceScraper:
         ]
 
         return AttendanceSnapshot(
-            date=datetime.now().date().isoformat(),
+            date=now_local().date().isoformat(),
             overall_percentage=float(overall_match.group(1)),
             total_classes_conducted=sum(subject.classes_held for subject in subjects),
             classes_attended=sum(subject.classes_present for subject in subjects),
@@ -239,7 +238,7 @@ class AttendanceScraper:
 
     def _screenshot(self, page: Page, reason: str) -> Path:
         SCREENSHOTS_DIR.mkdir(parents=True, exist_ok=True)
-        path = SCREENSHOTS_DIR / f"{datetime.now():%Y%m%d-%H%M%S}-{reason}.png"
+        path = SCREENSHOTS_DIR / f"{now_local():%Y%m%d-%H%M%S}-{reason}.png"
         try:
             page.screenshot(path=str(path), full_page=True)
             LOGGER.info("Saved screenshot: %s", path)

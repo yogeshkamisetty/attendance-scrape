@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 from attendance_scraper import AttendanceSnapshot
-from config import HISTORY_PATH, REPORTS_DIR
+from config import HISTORY_PATH, REPORTS_DIR, now_local
 
 
 def load_history() -> list[dict[str, Any]]:
@@ -97,7 +96,7 @@ def generate_markdown_report(
     else:
         lines.append("- No warnings")
 
-    lines.extend(["", f"Generated At: {datetime.now():%Y-%m-%d %H:%M:%S}"])
+    lines.extend(["", f"Generated At: {now_local():%Y-%m-%d %H:%M:%S IST}"])
     path = REPORTS_DIR / f"{snapshot.date}.md"
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return path

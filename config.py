@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from dotenv import load_dotenv, set_key
 
@@ -14,6 +16,11 @@ SCREENSHOTS_DIR = BASE_DIR / "screenshots"
 LOGS_DIR = BASE_DIR / "logs"
 HISTORY_PATH = BASE_DIR / "attendance_history.json"
 WHATSAPP_PROFILE_DIR = BASE_DIR / "whatsapp_profile"
+APP_TIMEZONE = ZoneInfo("Asia/Kolkata")
+
+
+def now_local() -> datetime:
+    return datetime.now(APP_TIMEZONE)
 
 
 @dataclass(frozen=True)
