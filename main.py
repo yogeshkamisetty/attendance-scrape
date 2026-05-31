@@ -9,7 +9,7 @@ from datetime import datetime, time as day_time, timedelta
 from pathlib import Path
 
 from attendance_scraper import AttendanceScraper
-from config import ensure_directories, load_settings, require_credentials, write_initial_env
+from config import ensure_directories, load_settings, now_local, require_credentials, write_initial_env
 from notifier import Notifier
 from storage import (
     compare_with_previous,
@@ -41,12 +41,12 @@ def run_check() -> None:
     snapshot = scraper.run()
     history = save_daily_snapshot(snapshot)
     comparison = compare_with_previous(snapshot, previous_record(history, snapshot.date))
-    report_path = generate_markdown_report(snapshot, comparison)
+    report_path = generate_markdown_report(snapshot, comparison, settings.attendance_threshold)
     report_text = report_path.read_text(encoding="utf-8")
 
     notifier = Notifier(settings)
     notification_text = (
-        generate_telegram_report(snapshot, comparison)
+        generate_telegram_report(snapshot, comparison, settings.attendance_threshold)
         if settings.notifier_method == "telegram"
         else report_text
     )
@@ -59,9 +59,12 @@ def run_check() -> None:
             f"Overall Attendance: {snapshot.overall_percentage:.2f}%",
         ]
         if snapshot.shortage_subjects:
-            alert_lines.append("Below 75%: " + ", ".join(snapshot.shortage_subjects))
+            alert_lines.append(
+                f"Below {settings.attendance_threshold:g}%: "
+                + ", ".join(snapshot.shortage_subjects)
+            )
         alert_text = (
-            generate_telegram_alert(snapshot)
+            generate_telegram_alert(snapshot, settings.attendance_threshold)
             if settings.notifier_method == "telegram"
             else "\n".join(alert_lines)
         )
@@ -71,8 +74,8 @@ def run_check() -> None:
 
 
 def seconds_until_8_pm() -> float:
-    now = datetime.now()
-    target = datetime.combine(now.date(), day_time(hour=20, minute=0))
+    now = now_local()
+    target = datetime.combine(now.date(), day_time(hour=20, minute=0), tzinfo=now.tzinfo)
     if now >= target:
         target += timedelta(days=1)
     return (target - now).total_seconds()

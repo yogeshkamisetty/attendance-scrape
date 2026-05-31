@@ -59,13 +59,13 @@ def compare_with_previous(
 
 
 def generate_markdown_report(
-    snapshot: AttendanceSnapshot, comparison: dict[str, Any]
+    snapshot: AttendanceSnapshot, comparison: dict[str, Any], threshold: float
 ) -> Path:
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
     warnings = []
     if snapshot.shortage_subjects:
         warnings.append(
-            "Subjects below 75%: " + ", ".join(snapshot.shortage_subjects)
+            f"Subjects below {threshold:g}%: " + ", ".join(snapshot.shortage_subjects)
         )
 
     overall_delta = comparison.get("overall_delta")
@@ -104,7 +104,7 @@ def generate_markdown_report(
 
 
 def generate_telegram_report(
-    snapshot: AttendanceSnapshot, comparison: dict[str, Any]
+    snapshot: AttendanceSnapshot, comparison: dict[str, Any], threshold: float
 ) -> str:
     theory, labs = _split_subject_groups(snapshot)
     generated_at = now_local().strftime("%I:%M %p - %b %d, %Y")
@@ -131,7 +131,7 @@ def generate_telegram_report(
             for subject in snapshot.subjects
             if subject.subject in snapshot.shortage_subjects
         )
-        lines.append(f"⚠️ <b>Below 75%:</b> {escape(shortage)}")
+        lines.append(f"⚠️ <b>Below {threshold:g}%:</b> {escape(shortage)}")
 
     overall_delta = comparison.get("overall_delta")
     if overall_delta is not None:
@@ -144,7 +144,7 @@ def generate_telegram_report(
     return "\n".join(lines)
 
 
-def generate_telegram_alert(snapshot: AttendanceSnapshot) -> str:
+def generate_telegram_alert(snapshot: AttendanceSnapshot, threshold: float) -> str:
     lines = [
         "🚨 <b>Attendance alert</b>",
         "",
@@ -156,7 +156,7 @@ def generate_telegram_alert(snapshot: AttendanceSnapshot) -> str:
         for subject in snapshot.subjects:
             if subject.subject in snapshot.shortage_subjects:
                 lines.append(
-                    f"⚠️ {escape(subject.subject)} is below 75% "
+                    f"⚠️ {escape(subject.subject)} is below {threshold:g}% "
                     f"(<code>{subject.percentage:.1f}%</code>)"
                 )
     return "\n".join(lines)
