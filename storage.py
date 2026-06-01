@@ -42,11 +42,13 @@ def scheduled_notification_sent_today(kind: str = "attendance") -> bool:
 
 def mark_scheduled_notification_sent(kind: str = "attendance") -> None:
     history = load_notification_history()
+    if not isinstance(history, list):
+        history = []
     today = now_local().date().isoformat()
     history = [
         entry
         for entry in history
-        if not (entry.get("date") == today and entry.get("kind") == kind)
+        if isinstance(entry, dict) and not (entry.get("date") == today and entry.get("kind") == kind)
     ]
     history.append(
         {
@@ -60,8 +62,11 @@ def mark_scheduled_notification_sent(kind: str = "attendance") -> None:
 
 def save_daily_snapshot(snapshot: AttendanceSnapshot) -> list[dict[str, Any]]:
     history = load_history()
+    if not isinstance(history, list):
+        history = []
     record = snapshot.to_dict()
-    history = [entry for entry in history if entry.get("date") != snapshot.date]
+    # Filter out None entries and match by date correctly
+    history = [entry for entry in history if isinstance(entry, dict) and entry.get("date") != snapshot.date]
     history.append(record)
     history.sort(key=lambda entry: entry.get("date", ""))
     HISTORY_PATH.write_text(json.dumps(history, indent=2), encoding="utf-8")
