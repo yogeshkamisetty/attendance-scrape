@@ -16,7 +16,8 @@ def load_history() -> list[dict[str, Any]]:
     if not HISTORY_PATH.exists():
         return []
     try:
-        return json.loads(HISTORY_PATH.read_text(encoding="utf-8"))
+        data = json.loads(HISTORY_PATH.read_text(encoding="utf-8"))
+        return data if isinstance(data, list) else []
     except json.JSONDecodeError:
         return []
 
@@ -25,7 +26,8 @@ def load_notification_history() -> list[dict[str, Any]]:
     if not NOTIFICATION_HISTORY_PATH.exists():
         return []
     try:
-        return json.loads(NOTIFICATION_HISTORY_PATH.read_text(encoding="utf-8"))
+        data = json.loads(NOTIFICATION_HISTORY_PATH.read_text(encoding="utf-8"))
+        return data if isinstance(data, list) else []
     except json.JSONDecodeError:
         return []
 
