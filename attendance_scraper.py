@@ -133,7 +133,7 @@ class AttendanceScraper:
 
         try:
             page.locator("#ContentPlaceHolder1_gvStdHistory").wait_for(
-                state="visible", timeout=15_000
+                state="visible", timeout=30_000
             )
         except PlaywrightTimeoutError as exc:
             self._screenshot(page, "attendance-layout-changed")
