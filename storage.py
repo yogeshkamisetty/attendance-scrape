@@ -15,6 +15,10 @@ NOTIFICATION_HISTORY_PATH = BASE_DIR / "notification_history.json"
 def load_history() -> list[dict[str, Any]]:
     if not HISTORY_PATH.exists():
         return []
+    try:
+        return json.loads(HISTORY_PATH.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return []
 
 
 def load_notification_history() -> list[dict[str, Any]]:
@@ -50,10 +54,6 @@ def mark_scheduled_notification_sent(kind: str = "attendance") -> None:
         }
     )
     NOTIFICATION_HISTORY_PATH.write_text(json.dumps(history, indent=2), encoding="utf-8")
-    try:
-        return json.loads(HISTORY_PATH.read_text(encoding="utf-8"))
-    except json.JSONDecodeError:
-        return []
 
 
 def save_daily_snapshot(snapshot: AttendanceSnapshot) -> list[dict[str, Any]]:
