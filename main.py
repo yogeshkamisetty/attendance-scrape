@@ -16,8 +16,10 @@ from storage import (
     generate_markdown_report,
     generate_telegram_alert,
     generate_telegram_report,
+    mark_scheduled_notification_sent,
     previous_record,
     save_daily_snapshot,
+    scheduled_notification_sent_today,
 )
 
 
@@ -33,7 +35,13 @@ def setup_logging() -> None:
     )
 
 
-def run_check() -> None:
+def run_check(scheduled: bool = False) -> None:
+    if scheduled and scheduled_notification_sent_today():
+        logging.getLogger(__name__).info(
+            "Scheduled attendance notification already sent today; skipping duplicate run."
+        )
+        return
+
     settings = load_settings()
     require_credentials(settings)
 
@@ -69,6 +77,9 @@ def run_check() -> None:
             else "\n".join(alert_lines)
         )
         notifier.send_report("Attendance Alert", alert_text)
+
+    if scheduled:
+        mark_scheduled_notification_sent()
 
     logging.getLogger(__name__).info("Attendance check completed. Report: %s", report_path)
 
@@ -127,6 +138,11 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="LBRCE ERP attendance monitoring bot")
     parser.add_argument("--check-now", action="store_true", help="Run the attendance check now")
     parser.add_argument(
+        "--scheduled",
+        action="store_true",
+        help="Run as a scheduled job and skip duplicate daily notifications",
+    )
+    parser.add_argument(
         "--install-task",
         action="store_true",
         help="Install a Windows Task Scheduler job for daily 8:00 PM checks",
@@ -159,7 +175,7 @@ def main() -> None:
     elif args.install_task:
         install_windows_task()
     elif args.check_now:
-        run_check()
+        run_check(scheduled=args.scheduled)
     else:
         run_scheduler()
 

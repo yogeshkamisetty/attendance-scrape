@@ -6,12 +6,50 @@ from pathlib import Path
 from typing import Any
 
 from attendance_scraper import AttendanceSnapshot
-from config import HISTORY_PATH, REPORTS_DIR, now_local
+from config import BASE_DIR, HISTORY_PATH, REPORTS_DIR, now_local
+
+
+NOTIFICATION_HISTORY_PATH = BASE_DIR / "notification_history.json"
 
 
 def load_history() -> list[dict[str, Any]]:
     if not HISTORY_PATH.exists():
         return []
+
+
+def load_notification_history() -> list[dict[str, Any]]:
+    if not NOTIFICATION_HISTORY_PATH.exists():
+        return []
+    try:
+        return json.loads(NOTIFICATION_HISTORY_PATH.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return []
+
+
+def scheduled_notification_sent_today(kind: str = "attendance") -> bool:
+    today = now_local().date().isoformat()
+    return any(
+        entry.get("date") == today and entry.get("kind") == kind
+        for entry in load_notification_history()
+    )
+
+
+def mark_scheduled_notification_sent(kind: str = "attendance") -> None:
+    history = load_notification_history()
+    today = now_local().date().isoformat()
+    history = [
+        entry
+        for entry in history
+        if not (entry.get("date") == today and entry.get("kind") == kind)
+    ]
+    history.append(
+        {
+            "date": today,
+            "kind": kind,
+            "sent_at": now_local().isoformat(timespec="seconds"),
+        }
+    )
+    NOTIFICATION_HISTORY_PATH.write_text(json.dumps(history, indent=2), encoding="utf-8")
     try:
         return json.loads(HISTORY_PATH.read_text(encoding="utf-8"))
     except json.JSONDecodeError:
