@@ -155,7 +155,7 @@ def generate_telegram_report(
     generated_at = now_local().strftime("%I:%M %p - %b %d, %Y")
 
     lines = [
-        "<b>Attendance Bot</b>",
+        "<b>\U0001f4ca Attendance Bot</b>",
         "<b>Attendance Report</b>",
         escape(now_local().strftime("%B %d, %Y")),
         "",
@@ -176,14 +176,14 @@ def generate_telegram_report(
             for subject in snapshot.subjects
             if subject.subject in snapshot.shortage_subjects
         )
-        lines.append(f"[WARN] <b>Below {threshold:g}%:</b> {escape(shortage)}")
+        lines.append(f"\u26a0\ufe0f <b>Below {threshold:g}%:</b> {escape(shortage)}")
 
     overall_delta = comparison.get("overall_delta")
     if overall_delta is not None:
         if overall_delta < 0:
-            lines.append(f"[DOWN] <b>Attendance dropped:</b> {abs(overall_delta):.2f}%")
+            lines.append(f"\U0001f53b <b>Attendance dropped:</b> {abs(overall_delta):.2f}%")
         elif overall_delta > 0:
-            lines.append(f"[UP] <b>Attendance increased:</b> {overall_delta:.2f}%")
+            lines.append(f"\u2705 <b>Attendance increased:</b> {overall_delta:.2f}%")
 
     lines.extend(["", f"<i>Generated at {escape(generated_at)} IST</i>"])
     return "\n".join(lines)
@@ -191,7 +191,7 @@ def generate_telegram_report(
 
 def generate_telegram_alert(snapshot: AttendanceSnapshot, threshold: float) -> str:
     lines = [
-        "<b>Attendance alert</b>",
+        "\U0001f6a8 <b>Attendance alert</b>",
         "",
         f"<b>Date:</b> {escape(now_local().strftime('%B %d, %Y'))}",
         f"<b>Overall:</b> <code>{snapshot.overall_percentage:.2f}%</code>",
@@ -201,7 +201,7 @@ def generate_telegram_alert(snapshot: AttendanceSnapshot, threshold: float) -> s
         for subject in snapshot.subjects:
             if subject.subject in snapshot.shortage_subjects:
                 lines.append(
-                    f"[WARN] {escape(subject.subject)} is below {threshold:g}% "
+                    f"\u26a0\ufe0f {escape(subject.subject)} is below {threshold:g}% "
                     f"(<code>{subject.percentage:.1f}%</code>)"
                 )
     return "\n".join(lines)
@@ -234,18 +234,18 @@ def _format_subject_lines(subjects: list[Any]) -> list[str]:
 
 def _status_icon(percentage: float) -> str:
     if percentage < 75:
-        return "[LOW]"
+        return "\U0001f534"
     if percentage >= 90:
-        return "[OK]"
-    return "[MID]"
+        return "\U0001f7e2"
+    return "\U0001f535"
 
 
 def _bar(percentage: float, width: int = 12) -> str:
     filled = round(width * max(0, min(percentage, 100)) / 100)
-    return "#" * filled + "-" * (width - filled)
+    return "\u2588" * filled + "\u2591" * (width - filled)
 
 
 def _shorten(value: str, limit: int) -> str:
     if len(value) <= limit:
         return value
-    return value[: limit - 1].rstrip() + "..."
+    return value[: limit - 1].rstrip() + "\u2026"
