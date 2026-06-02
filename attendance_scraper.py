@@ -118,42 +118,103 @@ class AttendanceScraper:
         history_url = self.settings.erp_url.rstrip("/") + "/Discipline/StudentHistory.aspx"
         self._load_with_retry(page, history_url)
         page.wait_for_timeout(1_500)
-        self._select_latest_term_if_needed(page)
+        terms = self._available_terms(page)
+        LOGGER.info("Found %s year/semester combinations to check", len(terms))
 
+        last_error: Exception | None = None
+        for index, term in enumerate(terms, 1):
+            try:
+                year, semester = term
+                LOGGER.info("Opening attendance for year=%s semester=%s", year, semester)
+                self._select_term(page, year, semester)
+                self._click_attendance_button(page)
+                self._wait_for_attendance_data(page)
+                if not self._has_complete_attendance_data(page):
+                    raise RuntimeError("Attendance page loaded without numeric attendance data")
+                return
+            except Exception as exc:
+                last_error = exc
+                LOGGER.warning("Attendance data not found for term %s: %s", term, exc)
+                if index < len(terms):
+                    self._load_with_retry(page, history_url)
+                    page.wait_for_timeout(1_500)
+
+        self._screenshot(page, "attendance-layout-changed")
+        raise RuntimeError("Attendance table was not found; ERP layout may have changed") from last_error
+
+    def _click_attendance_button(self, page: Page) -> None:
         attendance_button = page.locator(
             "#ContentPlaceHolder1_btnAtt, input[type='submit'][value*='Attendance' i]"
         ).first
-        try:
-            attendance_button.wait_for(state="visible", timeout=10_000)
-            attendance_button.click()
-            page.wait_for_timeout(2_500)
-        except Exception as exc:
-            self._screenshot(page, "attendance-button-not-found")
-            raise RuntimeError("Attendance page/control could not be found") from exc
+        attendance_button.wait_for(state="attached", timeout=15_000)
+        attendance_button.scroll_into_view_if_needed(timeout=10_000)
+        attendance_button.click(timeout=15_000)
 
+    def _wait_for_attendance_data(self, page: Page) -> None:
         try:
-            page.locator("#ContentPlaceHolder1_gvStdHistory").wait_for(
-                state="visible", timeout=30_000
-            )
-        except PlaywrightTimeoutError as exc:
-            self._screenshot(page, "attendance-layout-changed")
-            raise RuntimeError("Attendance table was not found; ERP layout may have changed") from exc
+            page.wait_for_load_state("networkidle", timeout=20_000)
+        except PlaywrightTimeoutError:
+            LOGGER.info("Network did not become idle after attendance click; continuing")
 
-    def _select_latest_term_if_needed(self, page: Page) -> None:
-        # The ERP currently defaults to the latest available year/semester.
-        for selector in ("#ContentPlaceHolder1_ddlYear", "#ContentPlaceHolder1_ddlsem"):
-            control = page.locator(selector)
-            if control.count() == 0:
-                continue
-            current = control.input_value()
-            if current and current != "0":
-                continue
-            options = control.locator("option").evaluate_all(
-                "els => els.map(o => o.value).filter(v => v && v !== '0')"
-            )
-            if options:
-                control.select_option(options[-1])
-                page.wait_for_timeout(1_000)
+        page.wait_for_function(
+            """
+            () => {
+              const text = document.body?.innerText || "";
+              const table = document.querySelector("#ContentPlaceHolder1_gvStdHistory");
+              const hasOverall = /Overall\\(%\\)\\s*:\\s*[0-9]/.test(text);
+              const hasSubjectHeader = table && /Classes Held/i.test(table.innerText || "");
+              return (
+                hasOverall ||
+                hasSubjectHeader
+              );
+            }
+            """,
+            timeout=20_000,
+        )
+
+    def _has_complete_attendance_data(self, page: Page) -> bool:
+        body_text = self._body_text(page)
+        has_overall = bool(
+            re.search(r"Overall\(%\)\s*:\s*[0-9]+(?:\.[0-9]+)?\s*%", body_text)
+        )
+        if not has_overall:
+            return False
+        rows = page.locator("#ContentPlaceHolder1_gvStdHistory tr").count()
+        return rows > 1
+
+    def _available_terms(self, page: Page) -> list[tuple[str, str]]:
+        year_control = page.locator("#ContentPlaceHolder1_ddlYear")
+        sem_control = page.locator("#ContentPlaceHolder1_ddlsem")
+        if year_control.count() == 0 or sem_control.count() == 0:
+            return [("", "")]
+
+        current = (year_control.input_value(), sem_control.input_value())
+        years = self._select_values(page, "#ContentPlaceHolder1_ddlYear")
+        semesters = self._select_values(page, "#ContentPlaceHolder1_ddlsem")
+        terms = [(year, sem) for year in reversed(years) for sem in reversed(semesters)]
+        if current[0] and current[1] and current != ("0", "0"):
+            terms = [current] + [term for term in terms if term != current]
+        return terms or [current]
+
+    @staticmethod
+    def _select_values(page: Page, selector: str) -> list[str]:
+        return page.locator(selector).locator("option").evaluate_all(
+            "els => els.map(o => o.value).filter(v => v && v !== '0')"
+        )
+
+    def _select_term(self, page: Page, year: str, semester: str) -> None:
+        if not year or not semester:
+            return
+        year_control = page.locator("#ContentPlaceHolder1_ddlYear")
+        sem_control = page.locator("#ContentPlaceHolder1_ddlsem")
+        if year_control.count() == 0 or sem_control.count() == 0:
+            return
+        if year_control.input_value() != year:
+            year_control.select_option(year)
+            page.wait_for_timeout(1_000)
+        if sem_control.input_value() != semester:
+            sem_control.select_option(semester)
+            page.wait_for_timeout(1_000)
 
     def _extract_attendance(self, page: Page) -> AttendanceSnapshot:
         body_text = self._body_text(page)
