@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-from html import escape
 from pathlib import Path
 from typing import Any
 
@@ -155,20 +154,20 @@ def generate_telegram_report(
     generated_at = now_local().strftime("%I:%M %p - %b %d, %Y")
 
     lines = [
-        "<b>\U0001f4ca Attendance Bot</b>",
-        "<b>Attendance Report</b>",
-        escape(now_local().strftime("%B %d, %Y")),
+        "**\U0001f4ca Attendance Bot**",
+        "**Attendance Report**",
+        now_local().strftime("%B %d, %Y"),
         "",
-        f"<b>Overall:</b> <code>{snapshot.overall_percentage:.2f}%</code>",
-        f"<b>Conducted:</b> <code>{snapshot.total_classes_conducted}</code>",
-        f"<b>Attended:</b> <code>{snapshot.classes_attended}</code>",
+        f"**Overall:** `{snapshot.overall_percentage:.2f}%`",
+        f"**Conducted:** `{snapshot.total_classes_conducted}`",
+        f"**Attended:** `{snapshot.classes_attended}`",
         "",
     ]
 
     if theory:
-        lines.extend(["<b>THEORY</b>", *_format_subject_lines(theory), ""])
+        lines.extend(["**THEORY**", *_format_subject_lines(theory), ""])
     if labs:
-        lines.extend(["<b>LABS &amp; OTHERS</b>", *_format_subject_lines(labs), ""])
+        lines.extend(["**LABS & OTHERS**", *_format_subject_lines(labs), ""])
 
     if snapshot.shortage_subjects:
         shortage = ", ".join(
@@ -176,33 +175,33 @@ def generate_telegram_report(
             for subject in snapshot.subjects
             if subject.subject in snapshot.shortage_subjects
         )
-        lines.append(f"\u26a0\ufe0f <b>Below {threshold:g}%:</b> {escape(shortage)}")
+        lines.append(f"\u26a0\ufe0f **Below {threshold:g}%:** {shortage}")
 
     overall_delta = comparison.get("overall_delta")
     if overall_delta is not None:
         if overall_delta < 0:
-            lines.append(f"\U0001f53b <b>Attendance dropped:</b> {abs(overall_delta):.2f}%")
+            lines.append(f"\U0001f53b **Attendance dropped:** {abs(overall_delta):.2f}%")
         elif overall_delta > 0:
-            lines.append(f"\u2705 <b>Attendance increased:</b> {overall_delta:.2f}%")
+            lines.append(f"\u2705 **Attendance increased:** {overall_delta:.2f}%")
 
-    lines.extend(["", f"<i>Generated at {escape(generated_at)} IST</i>"])
+    lines.extend(["", f"*Generated at {generated_at} IST*"])
     return "\n".join(lines)
 
 
 def generate_telegram_alert(snapshot: AttendanceSnapshot, threshold: float) -> str:
     lines = [
-        "\U0001f6a8 <b>Attendance alert</b>",
+        "\U0001f6a8 **Attendance alert**",
         "",
-        f"<b>Date:</b> {escape(now_local().strftime('%B %d, %Y'))}",
-        f"<b>Overall:</b> <code>{snapshot.overall_percentage:.2f}%</code>",
+        f"**Date:** {now_local().strftime('%B %d, %Y')}",
+        f"**Overall:** `{snapshot.overall_percentage:.2f}%`",
     ]
     if snapshot.shortage_subjects:
         lines.append("")
         for subject in snapshot.subjects:
             if subject.subject in snapshot.shortage_subjects:
                 lines.append(
-                    f"\u26a0\ufe0f {escape(subject.subject)} is below {threshold:g}% "
-                    f"(<code>{subject.percentage:.1f}%</code>)"
+                    f"\u26a0\ufe0f {subject.subject} is below {threshold:g}% "
+                    f"(`{subject.percentage:.1f}%`)"
                 )
     return "\n".join(lines)
 
@@ -223,10 +222,10 @@ def _format_subject_lines(subjects: list[Any]) -> list[str]:
     return [
         (
             f"{_status_icon(subject.percentage)} "
-            f"{escape(_shorten(subject.subject, 26))}\n"
-            f"<code>{_bar(subject.percentage)}</code> "
-            f"<b>{subject.percentage:.1f}%</b> "
-            f"<code>{subject.classes_present}/{subject.classes_held}</code>"
+            f"{_shorten(subject.subject, 26)}\n"
+            f"`{_bar(subject.percentage)}` "
+            f"**{subject.percentage:.1f}%** "
+            f"`{subject.classes_present}/{subject.classes_held}`"
         )
         for subject in subjects
     ]
