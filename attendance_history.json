@@ -473,5 +473,100 @@
         "percentage": 86.4
       }
     ]
+  },
+  {
+    "date": "2026-06-05",
+    "overall_percentage": 88.13,
+    "total_classes_conducted": 539,
+    "classes_attended": 475,
+    "shortage_subjects": [
+      "English Certification Course"
+    ],
+    "subjects": [
+      {
+        "subject": "Managerial Economics and Financial Analysis",
+        "classes_held": 40,
+        "classes_present": 34,
+        "percentage": 85.0
+      },
+      {
+        "subject": "Probability & Statistics",
+        "classes_held": 49,
+        "classes_present": 48,
+        "percentage": 98.0
+      },
+      {
+        "subject": "Operating Systems",
+        "classes_held": 49,
+        "classes_present": 43,
+        "percentage": 87.8
+      },
+      {
+        "subject": "Database Management Systems",
+        "classes_held": 54,
+        "classes_present": 49,
+        "percentage": 90.7
+      },
+      {
+        "subject": "Software Engineering",
+        "classes_held": 46,
+        "classes_present": 37,
+        "percentage": 80.4
+      },
+      {
+        "subject": "Environmental Science",
+        "classes_held": 32,
+        "classes_present": 26,
+        "percentage": 81.3
+      },
+      {
+        "subject": "Operating Systems lab",
+        "classes_held": 48,
+        "classes_present": 48,
+        "percentage": 100.0
+      },
+      {
+        "subject": "Database Management Systems Lab",
+        "classes_held": 45,
+        "classes_present": 42,
+        "percentage": 93.3
+      },
+      {
+        "subject": "Full Stack Development-I",
+        "classes_held": 39,
+        "classes_present": 36,
+        "percentage": 92.3
+      },
+      {
+        "subject": "Design Thinking& Innovation",
+        "classes_held": 48,
+        "classes_present": 39,
+        "percentage": 81.3
+      },
+      {
+        "subject": "ASSOCIATION",
+        "classes_held": 5,
+        "classes_present": 4,
+        "percentage": 80.0
+      },
+      {
+        "subject": "SELF LEARNING",
+        "classes_held": 5,
+        "classes_present": 4,
+        "percentage": 80.0
+      },
+      {
+        "subject": "English Certification Course",
+        "classes_held": 13,
+        "classes_present": 8,
+        "percentage": 61.5
+      },
+      {
+        "subject": "TUTORIAL",
+        "classes_held": 66,
+        "classes_present": 57,
+        "percentage": 86.4
+      }
+    ]
   }
 ]
