@@ -3951,5 +3951,95 @@
         "percentage": 94.4
       }
     ]
+  },
+  {
+    "date": "2026-07-19",
+    "overall_percentage": 75.51,
+    "total_classes_conducted": 98,
+    "classes_attended": 74,
+    "shortage_subjects": [
+      "Computer Networks",
+      "Formal Languages and Automata Theory",
+      "Artificial Intelligence",
+      "Sustainable Energy Technologies",
+      "Computer Networks Lab",
+      "Full Stack Development-II",
+      "User Interface Design using Flutter",
+      "Technical Training"
+    ],
+    "subjects": [
+      {
+        "subject": "Data Warehousing and Data Mining",
+        "classes_held": 8,
+        "classes_present": 6,
+        "percentage": 75.0
+      },
+      {
+        "subject": "Computer Networks",
+        "classes_held": 10,
+        "classes_present": 7,
+        "percentage": 70.0
+      },
+      {
+        "subject": "Formal Languages and Automata Theory",
+        "classes_held": 7,
+        "classes_present": 5,
+        "percentage": 71.4
+      },
+      {
+        "subject": "Artificial Intelligence",
+        "classes_held": 8,
+        "classes_present": 5,
+        "percentage": 62.5
+      },
+      {
+        "subject": "Sustainable Energy Technologies",
+        "classes_held": 6,
+        "classes_present": 4,
+        "percentage": 66.7
+      },
+      {
+        "subject": "Data Mining Lab",
+        "classes_held": 6,
+        "classes_present": 6,
+        "percentage": 100.0
+      },
+      {
+        "subject": "Computer Networks Lab",
+        "classes_held": 9,
+        "classes_present": 6,
+        "percentage": 66.7
+      },
+      {
+        "subject": "Full Stack Development-II",
+        "classes_held": 9,
+        "classes_present": 6,
+        "percentage": 66.7
+      },
+      {
+        "subject": "User Interface Design using Flutter",
+        "classes_held": 6,
+        "classes_present": 4,
+        "percentage": 66.7
+      },
+      {
+        "subject": "ASSOCIATION",
+        "classes_held": 2,
+        "classes_present": 2,
+        "percentage": 100.0
+      },
+      {
+        "subject": "Technical Training",
+        "classes_held": 9,
+        "classes_present": 6,
+        "percentage": 66.7
+      },
+      {
+        "subject": "TUTORIAL",
+        "classes_held": 18,
+        "classes_present": 17,
+        "percentage": 94.4
+      }
+    ]
   }
 ]
