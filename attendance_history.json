@@ -4469,5 +4469,88 @@
         "percentage": 95.2
       }
     ]
+  },
+  {
+    "date": "2026-07-25",
+    "overall_percentage": 81.4,
+    "total_classes_conducted": 129,
+    "classes_attended": 105,
+    "shortage_subjects": [
+      "Artificial Intelligence"
+    ],
+    "subjects": [
+      {
+        "subject": "Data Warehousing and Data Mining",
+        "classes_held": 11,
+        "classes_present": 9,
+        "percentage": 81.8
+      },
+      {
+        "subject": "Computer Networks",
+        "classes_held": 12,
+        "classes_present": 9,
+        "percentage": 75.0
+      },
+      {
+        "subject": "Formal Languages and Automata Theory",
+        "classes_held": 10,
+        "classes_present": 8,
+        "percentage": 80.0
+      },
+      {
+        "subject": "Artificial Intelligence",
+        "classes_held": 11,
+        "classes_present": 8,
+        "percentage": 72.7
+      },
+      {
+        "subject": "Sustainable Energy Technologies",
+        "classes_held": 9,
+        "classes_present": 7,
+        "percentage": 77.8
+      },
+      {
+        "subject": "Data Mining Lab",
+        "classes_held": 9,
+        "classes_present": 9,
+        "percentage": 100.0
+      },
+      {
+        "subject": "Computer Networks Lab",
+        "classes_held": 12,
+        "classes_present": 9,
+        "percentage": 75.0
+      },
+      {
+        "subject": "Full Stack Development-II",
+        "classes_held": 12,
+        "classes_present": 9,
+        "percentage": 75.0
+      },
+      {
+        "subject": "User Interface Design using Flutter",
+        "classes_held": 8,
+        "classes_present": 6,
+        "percentage": 75.0
+      },
+      {
+        "subject": "ASSOCIATION",
+        "classes_held": 2,
+        "classes_present": 2,
+        "percentage": 100.0
+      },
+      {
+        "subject": "Technical Training",
+        "classes_held": 12,
+        "classes_present": 9,
+        "percentage": 75.0
+      },
+      {
+        "subject": "TUTORIAL",
+        "classes_held": 21,
+        "classes_present": 20,
+        "percentage": 95.2
+      }
+    ]
   }
 ]
